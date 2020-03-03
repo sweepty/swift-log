@@ -15,7 +15,7 @@
 /// A `LogHandler` is an implementation of a logging backend.
 ///
 /// This type is an implementation detail and should not normally be used, unless implementing your own logging backend.
-/// To use the swift-log API, please refer to the documentation of `Logger`.
+/// To use the SwiftLog API, please refer to the documentation of `Logger`.
 ///
 /// # Implementation requirements
 ///
@@ -32,7 +32,7 @@
 ///
 /// ```swift
 /// LoggingSystem.bootstrap(MyLogHandler.init) // your LogHandler might have a different bootstrapping step
-/// var logger1: Logger(label: "first logger")
+/// var logger1 = Logger(label: "first logger")
 /// logger1.logLevel = .debug
 /// logger1[metadataKey: "only-on"] = "first"
 ///

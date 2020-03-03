@@ -13,7 +13,7 @@
 ##
 ##===----------------------------------------------------------------------===##
 
-set -e
+set -ex
 
 my_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 root_path="$my_path/.."
@@ -51,27 +51,34 @@ fi
 if ! command -v jazzy > /dev/null; then
   gem install jazzy --no-ri --no-rdoc
 fi
-module_switcher="docs/$version/README.md"
+
+jazzy_dir="$root_path/.build/jazzy"
+rm -rf "$jazzy_dir"
+mkdir -p "$jazzy_dir"
+
+module_switcher="$jazzy_dir/README.md"
 jazzy_args=(--clean
-            --author 'swift-log team'
+            --author 'SwiftLog team'
             --readme "$module_switcher"
             --author_url https://github.com/apple/swift-log
             --github_url https://github.com/apple/swift-log
+            --github-file-prefix https://github.com/apple/swift-log/tree/$version
             --theme fullwidth
             --xcodebuild-arguments -scheme,swift-log-Package)
 cat > "$module_switcher" <<"EOF"
-# swift-log Docs
+# SwiftLog Docs
 
-swift-log is a Swift 5 logging API package.
+SwiftLog is a Swift logging API package.
 
-To get started with swift-log, [`import Logging`](../Logging/index.html). The
+To get started with SwiftLog, [`import Logging`](../Logging/index.html). The
 most important type is [`Logger`](https://apple.github.io/swift-log/docs/current/Logging/Structs/Logger.html)
 which you can use to emit log messages.
-
 EOF
 
 for module in "${modules[@]}"; do
-  args=("${jazzy_args[@]}"  --output "$root_path/docs/$version/$module" --module "$module")
+  args=("${jazzy_args[@]}" --output "$jazzy_dir/docs/$version/$module" --docset-path "$jazzy_dir/docset/$version/$module"
+        --module "$module" --module-version $version
+        --root-url "https://apple.github.io/swift-log/docs/$version/$module/")
   if [[ -f "$root_path/.build/sourcekitten/$module.json" ]]; then
     args+=(--sourcekitten-sourcefile "$root_path/.build/sourcekitten/$module.json")
   fi
@@ -79,13 +86,15 @@ for module in "${modules[@]}"; do
 done
 
 # push to github pages
-if [[ $CI == true ]]; then
+if [[ $PUSH == true ]]; then
   BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
   GIT_AUTHOR=$(git --no-pager show -s --format='%an <%ae>' HEAD)
   git fetch origin +gh-pages:gh-pages
   git checkout gh-pages
-  rm -rf docs/current
-  cp -r docs/$version docs/current
+  rm -rf "docs/$version"
+  rm -rf "docs/current"
+  cp -r "$jazzy_dir/docs/$version" docs/
+  cp -r "docs/$version" docs/current
   git add --all docs
   echo '<html><head><meta http-equiv="refresh" content="0; url=docs/current/Logging/index.html" /></head></html>' > index.html
   git add index.html
@@ -93,6 +102,7 @@ if [[ $CI == true ]]; then
   git add .nojekyll
   changes=$(git diff-index --name-only HEAD)
   if [[ -n "$changes" ]]; then
+    echo -e "changes detected\n$changes"
     git commit --author="$GIT_AUTHOR" -m "publish $version docs"
     git push origin gh-pages
   else

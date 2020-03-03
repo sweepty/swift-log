@@ -23,24 +23,28 @@ import XCTest
 ///
 
 extension LoggingTest {
-
-   static var allTests : [(String, (LoggingTest) -> () throws -> Void)] {
-      return [
-                ("testAutoclosure", testAutoclosure),
-                ("testMultiplex", testMultiplex),
-                ("testDictionaryMetadata", testDictionaryMetadata),
-                ("testListMetadata", testListMetadata),
-                ("testStringConvertibleMetadata", testStringConvertibleMetadata),
-                ("testAutoClosuresAreNotForcedUnlessNeeded", testAutoClosuresAreNotForcedUnlessNeeded),
-                ("testLocalMetadata", testLocalMetadata),
-                ("testCustomFactory", testCustomFactory),
-                ("testAllLogLevelsExceptEmergencyCanBeBlocked", testAllLogLevelsExceptEmergencyCanBeBlocked),
-                ("testAllLogLevelsWork", testAllLogLevelsWork),
-                ("testLogMessageWithStringInterpolation", testLogMessageWithStringInterpolation),
-                ("testLoggingAString", testLoggingAString),
-                ("testMultiplexerIsValue", testMultiplexerIsValue),
-                ("testLoggerWithGlobalOverride", testLoggerWithGlobalOverride),
-           ]
-   }
+    static var allTests: [(String, (LoggingTest) -> () throws -> Void)] {
+        return [
+            ("testAutoclosure", testAutoclosure),
+            ("testMultiplex", testMultiplex),
+            ("testDictionaryMetadata", testDictionaryMetadata),
+            ("testListMetadata", testListMetadata),
+            ("testStringConvertibleMetadata", testStringConvertibleMetadata),
+            ("testAutoClosuresAreNotForcedUnlessNeeded", testAutoClosuresAreNotForcedUnlessNeeded),
+            ("testLocalMetadata", testLocalMetadata),
+            ("testCustomFactory", testCustomFactory),
+            ("testAllLogLevelsExceptCriticalCanBeBlocked", testAllLogLevelsExceptCriticalCanBeBlocked),
+            ("testAllLogLevelsWork", testAllLogLevelsWork),
+            ("testLogMessageWithStringInterpolation", testLogMessageWithStringInterpolation),
+            ("testLoggingAString", testLoggingAString),
+            ("testMultiplexerIsValue", testMultiplexerIsValue),
+            ("testLoggerWithGlobalOverride", testLoggerWithGlobalOverride),
+            ("testLogLevelCases", testLogLevelCases),
+            ("testLogLevelOrdering", testLogLevelOrdering),
+            ("testStreamLogHandlerWritesToAStream", testStreamLogHandlerWritesToAStream),
+            ("testStreamLogHandlerOutputFormat", testStreamLogHandlerOutputFormat),
+            ("testStreamLogHandlerOutputFormatWithMetaData", testStreamLogHandlerOutputFormatWithMetaData),
+            ("testStdioOutputStreamFlush", testStdioOutputStreamFlush),
+        ]
+    }
 }
-

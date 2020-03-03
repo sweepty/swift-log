@@ -65,8 +65,8 @@ class LocalLoggerTest: XCTestCase {
         logging.history.assertNotExist(level: .info, message: "TestLibrary::doSomethingAsync") // global context
         logging.history.assertExist(level: .debug, message: "Struct3::doSomethingElse::Local", metadata: ["bar": "baz", "baz": "qux"]) // hyper local context
         logging.history.assertExist(level: .debug, message: "Struct3::doSomethingElse::end", metadata: ["bar": "baz"]) // local context
-        logging.history.assertExist(level: .debug, message: "Struct3::doSomething::end", metadata: ["bar": "baz"]) // local context
         logging.history.assertExist(level: .debug, message: "Struct2::doSomethingElse::end") // local context
+        logging.history.assertExist(level: .debug, message: "Struct3::doSomething::end", metadata: ["bar": "baz"]) // local context
         logging.history.assertNotExist(level: .debug, message: "Struct1::doSomethingElse::end") // global context
         logging.history.assertNotExist(level: .debug, message: "Struct1::doSomething::end") // global context
     }
@@ -111,7 +111,7 @@ private struct Struct2 {
         var c = context
         c.logLevel = .info // only effects from this point on
         c.logger.info("Struct2::doSomething")
-        doSomethingElse(context: c)
+        self.doSomethingElse(context: c)
         c.logger.debug("Struct2::doSomething::end")
     }
 
@@ -131,7 +131,7 @@ private struct Struct3 {
         var c = context
         c["bar"] = "baz" // only effects from this point on
         c.logger.error("Struct3::doSomething")
-        doSomethingElse(context: c)
+        self.doSomethingElse(context: c)
         c.logger.debug("Struct3::doSomething::end")
     }
 
@@ -139,7 +139,7 @@ private struct Struct3 {
         context.logger.error("Struct3::doSomethingElse")
         let group = DispatchGroup()
         group.enter()
-        queue.async {
+        self.queue.async {
             context.logger.warning("Struct3::doSomethingElseAsync")
             let library = TestLibrary()
             library.doSomething()

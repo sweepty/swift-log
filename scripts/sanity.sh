@@ -13,8 +13,27 @@
 ##
 ##===----------------------------------------------------------------------===##
 
+##===----------------------------------------------------------------------===##
+##
+## This source file is part of the SwiftNIO open source project
+##
+## Copyright (c) 2017-2019 Apple Inc. and the SwiftNIO project authors
+## Licensed under Apache License v2.0
+##
+## See LICENSE.txt for license information
+## See CONTRIBUTORS.txt for the list of SwiftNIO project authors
+##
+## SPDX-License-Identifier: Apache-2.0
+##
+##===----------------------------------------------------------------------===##
+
 set -eu
 here="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+function replace_acceptable_years() {
+    # this needs to replace all acceptable forms with 'YEARS'
+    sed -e 's/2018-2019/YEARS/' -e 's/2019/YEARS/'
+}
 
 printf "=> Checking linux tests... "
 FIRST_OUT="$(git status --porcelain)"
@@ -28,10 +47,23 @@ else
   printf "\033[0;32mokay.\033[0m\n"
 fi
 
-printf "=> Checking license headers... "
+printf "=> Checking format... "
+FIRST_OUT="$(git status --porcelain)"
+swiftformat . > /dev/null 2>&1
+SECOND_OUT="$(git status --porcelain)"
+if [[ "$FIRST_OUT" != "$SECOND_OUT" ]]; then
+  printf "\033[0;31mformatting issues!\033[0m\n"
+  git --no-pager diff
+  exit 1
+else
+  printf "\033[0;32mokay.\033[0m\n"
+fi
+
+printf "=> Checking license headers\n"
 tmp=$(mktemp /tmp/.swift-log-sanity_XXXXXX)
 
 for language in swift-or-c bash dtrace; do
+  printf "   * $language... "
   declare -a matching_files
   declare -a exceptions
   expections=( )
@@ -45,7 +77,7 @@ for language in swift-or-c bash dtrace; do
 //
 // This source file is part of the Swift Logging API open source project
 //
-// Copyright (c) 2018-2019 Apple Inc. and the Swift Logging API project authors
+// Copyright (c) YEARS Apple Inc. and the Swift Logging API project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -64,7 +96,7 @@ EOF
 ##
 ## This source file is part of the Swift Logging API open source project
 ##
-## Copyright (c) 2018-2019 Apple Inc. and the Swift Logging API project authors
+## Copyright (c) YEARS Apple Inc. and the Swift Logging API project authors
 ## Licensed under Apache License v2.0
 ##
 ## See LICENSE.txt for license information
@@ -83,7 +115,7 @@ EOF
  *
  *  This source file is part of the Swift Logging API open source project
  *
- *  Copyright (c) 2018-2019 Apple Inc. and the Swift Logging API project authors
+ *  Copyright (c) YEARS Apple Inc. and the Swift Logging API project authors
  *  Licensed under Apache License v2.0
  *
  *  See LICENSE.txt for license information
@@ -108,9 +140,9 @@ EOF
       \( \! -path './.build/*' -a \
       \( "${matching_files[@]}" \) -a \
       \( \! \( "${exceptions[@]}" \) \) \) | while read line; do
-      if [[ "$(cat "$line" | head -n $expected_lines | shasum)" != "$expected_sha" ]]; then
+      if [[ "$(cat "$line" | replace_acceptable_years | head -n $expected_lines | shasum)" != "$expected_sha" ]]; then
         printf "\033[0;31mmissing headers in file '$line'!\033[0m\n"
-        diff -u <(cat "$line" | head -n $expected_lines) "$tmp"
+        diff -u <(cat "$line" | replace_acceptable_years | head -n $expected_lines) "$tmp"
         exit 1
       fi
     done
